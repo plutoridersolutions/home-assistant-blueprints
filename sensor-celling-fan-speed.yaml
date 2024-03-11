@@ -1,0 +1,400 @@
+blueprint:
+  name: Occupancy based auto celling fan speed
+  description: >
+    **Version: 1.0**
+    Motion sensor/ Binary Sensor triggred Temperature based Auto fan control.
+
+    **If you like my blueprints, and would like to show your support or just say thank you?** 🙂
+
+    
+    <details>
+    <summary><b>The Automation Process:</b> - Click here to expand</summary>
+    
+    Fan Speed will be set when initially turned on by relating the ambient temperature to an equivalant speed setting.
+    A time delay is used to eliminate frequent speed changes.
+    As the temperature changes the fan speed will increase or decrease accordingly, rather than being set.
+    This is to allow a manual change of starting speed.
+    At the minimum temperature setting the fan will be turned off.
+
+    - **Trigger:**
+        - You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) or [schedules](https://www.home-assistant.io/integrations/schedule) to trigger the automation.
+        - A trigger sensor, such as a Motion Sensor, will activate lights, switches, scenes, and scripts when the automation is triggered.
+        - A time delay begins the turning OFF process after all triggers are clear. See [grouping](https://community.home-assistant.io/t/481048/34) sensors for more information.
+        - If triggers are activated again before the time delay ends, the automation resets for continuous lighting.
+    - **Time-Based Options:**
+        - Specify precise start and end times to define when the automation should run.
+   
+  domain: automation
+  input:
+    motion_trigger:
+      name: Trigger Sensor - Binary Sensors - Schedule *
+      description: The trigger sensors are responsible for turning the lights, switches, scenes, and scripts ON and OFF. You can choose any [binary sensors](https://www.home-assistant.io/integrations/binary_sensor/) you prefer as triggers.
+        Alternatively, if you prefer a time-based trigger, you can also add a [schedule helper](https://community.home-assistant.io/t/481048/1616).
+        
+        
+        When using multiple trigger sensors, it's advisable to group them together using a group helper.
+        This ensures smoother automation execution and prevents conflicts.
+        
+        
+        For more information on grouping your trigger sensors [Click Here](https://community.home-assistant.io/t/481048/34)
+      selector:
+        entity:
+          filter:
+            domain:
+              - binary_sensor
+              - schedule
+          multiple: true
+    time_delay:
+      name: Time Delay
+      description: The time delay determines how long the lights, switches, scenes, and scripts will remain active after all triggers are clear, initiating the time delay to turn them OFF.
+      default: 5
+      selector:
+        number:
+          min: 0
+          max: 30
+          step: 0.5
+          unit_of_measurement: minutes
+    include_bypass:
+      name: Use The Bypass Options (Optional)
+      description: Select if you would like to enable an option. Each option allows manual control of your lights but alters its
+        behaviour by either turning ON, OFF, or keeping its current state when the bypass is switched ON. When enabling an option,
+        please enter the bypass switch into the corresponding input below.
+        
+        
+        For more information on how to use the bypass [Click Here](https://community.home-assistant.io/t/481048/895)
+      default: bypass_disabled
+      selector:
+        select:
+          options:
+            - label: Enable the bypass option
+              value: "bypass_enabled"
+            - label: Disable the bypass option
+              value: "bypass_disabled"          
+    motion_bypass_fans_stop:
+      name: Bypass Switch - Keep The Fans Current State
+      description: Select the switches that will keep your fans current state, bypass the trigger sensor, and allow your lights to function as normal.
+      default: []
+      selector:
+        entity:
+          multiple: true
+    fan_switch:
+      name: Fan
+      description: The fan you wish to speed control.
+      selector:
+        entity:
+          domain:
+          - fan
+          multiple: false
+    min_fan_speed:
+      name: Minimum Fan Speed
+      description: Set the minimum percentage speed when your fan is still on.
+      default: 16
+      selector:
+        number:
+          min: 1.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: '%'
+    max_fan_speed:
+      name: Maximum Fan Speed
+      description: Set the maximum percentage speed for your fan.
+      default: 100
+      selector:
+        number:
+          min: 1.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: '%'
+    max_temp:
+      name: What temperature would you like the fan to run at max fan speed.
+      description: Set the high temperture sensor value (degC).
+      default: 31
+      selector:
+        number:
+          min: 15.0
+          max: 40.0
+          step: 1.0
+          mode: slider
+    min_temp:
+      name: What temperature would you like the fan to run at minimum speed.
+      description: Set the low temperture sensor value (degC).
+      default: 23
+      selector:
+        number:
+          min: 15.0
+          max: 40.0
+          step: 1.0
+          mode: slider
+    off_temp:
+      name: What temperature would you like the fan to turn off.
+      description: Set the fan OFF temperture sensor value (degC).
+      default: 21.5
+      selector:
+        number:
+          min: 15.0
+          max: 50.0
+          step: 1.0
+          mode: slider
+    change_time:
+      name: Change frequency delay
+      description: How long to delay bewteen potential speed adjustments.
+      default: 30
+      selector:
+        number:
+          min: 1.0
+          max: 120.0
+          unit_of_measurement: minutes
+          step: 1.0
+          mode: slider
+    temp_sensor:
+      name: Temperature Sensor
+      description: Enter your temperature sensor.
+      default: []
+      selector:
+        entity:
+          domain:
+          - sensor
+          device_class:
+          - temperature
+          multiple: false
+    blocker_entity:
+      name: (OPTIONAL) Blocking entity
+      description: If this entity's state is on, it will prevent the automation from
+        running. E.g. sleepmode or away mode.
+      default:
+      selector:
+        entity:
+          multiple: false
+    change_threshold:
+      name: Minimum percentage change
+      description: The minimum percentage change (between current fan speed and set
+        fan speed)
+      default: 1
+      selector:
+        number:
+          min: 1.0
+          max: 100.0
+          mode: slider
+          step: 1.0
+          unit_of_measurement: '%'
+    include_time:
+      name: Use The Time Options (Optional)
+      description: This option is used to add a condition that only allows the automation to run between the start time and end time settings on the selected weekdays.
+        These time settings are global conditions that can work alongside other options.
+        Enabling this option is not necessary for the night lights time condition to work.
+        
+        
+        For more information on time settings [Click Here](https://community.home-assistant.io/t/481048/310)
+      default: time_disabled
+      selector:
+        select:
+          options:
+            - label: Enable the time options
+              value: "time_enabled"
+            - label: Disable the time options
+              value: "time_disabled"
+    after_time:
+      name: Start Time
+      description: Set the start time.
+      default: 00:00:00
+      selector:
+        time:
+    before_time:
+      name: End Time
+      description: Set the end time.
+      default: 00:00:00
+      selector:
+        time:
+# If motion sensor turns ON again within the time delay, it will restart the script.
+mode: restart
+max_exceeded: silent
+
+variables:
+  motion_trigger: !input motion_trigger
+  time_delay: !input time_delay
+  include_bypass: !input include_bypass
+  motion_bypass_fans_stop: !input motion_bypass_fanss_stop
+  change_time: !input change_time
+  min_temp: !input min_temp
+  off_temp: !input off_temp
+  max_temp: !input max_temp
+  min_fan_speed: !input min_fan_speed
+  max_fan_speed: !input max_fan_speed
+  temp_sensor: !input temp_sensor
+  fan_switch: !input fan_switch
+  change_threshold: !input change_threshold
+  blocker_entity: !input blocker_entity
+  current_temp: "{{ states(temp_sensor) | float(0)}}"
+  fan_speed: '{{ state_attr(fan_switch,''percentage'') | float(0)}}'
+  temp_range: '{{max_temp | float(0)-min_temp | float(0)}}'
+  fan_range: '{{max_fan_speed | float(0) - min_fan_speed | float(0)}}'
+  slope: '{{fan_range | float(0)/temp_range | float(0)}}'
+  set_fan_speed: '{{ [[slope|float(0) * (current_temp|float(0) - min_temp|float(0)) + min_fan_speed|float(0),  min_fan_speed] | max, max_fan_speed] | min}}'
+  speed_diff: '{{(fan_speed - set_fan_speed)|abs}}'
+  include_time: !input include_time
+  after_time: !input after_time
+  before_time: !input before_time
+  
+trigger:
+- platform: state
+  entity_id: !input motion_trigger
+  id: "motion"
+  from: "off"
+  to: "on"
+- platform: time
+  id: "beforetime"
+  at: !input before_time
+- platform: time
+  id: "aftertime"
+  at: !input after_time
+- platform: state
+  entity_id: !input fan_switch
+  id: fanon
+  to: 'on'
+  from: 'off'
+- platform: state
+  id: "bypass_stop"
+  entity_id: !input motion_bypass_fans_stop
+  from: "off"
+  to: "on"
+- platform: state
+  entity_id: !input temp_sensor
+- platform: numeric_state
+  entity_id: !input temp_sensor
+  below: !input off_temp
+- platform: homeassistant
+  id: "restrat_ha"
+  event: start
+
+# All Conditions
+condition:
+#Trigger conditions
+  - condition: or
+    conditions:
+      - condition: and # trigger from off to on
+        conditions:
+          - condition: state
+            entity_id: !input motion_trigger
+            match: any
+            state: 'on'
+          - condition: trigger
+            id: 'motion'
+      - condition: and # trigger by time & check motion trigger is on
+        conditions:
+          - condition: state
+            entity_id: !input motion_trigger
+            state: 'on'
+            match: any
+          -  "{{ include_time == 'time_enabled' }}"
+          - condition: trigger
+            id: 'aftertime'
+      - condition: and # trigger by by-pass stop
+        conditions:
+          - condition: trigger
+            id: 'bypass_stop'
+          - "{{ 'bypass_enabled' in include_bypass }}"
+      - condition: and # trigger by HA Restart & check if any triggers are on
+        conditions:
+          - condition: state
+            entity_id: !input motion_trigger
+            match: any
+            state: 'on'
+          - condition: trigger
+            id: 'restrat_ha'
+      - condition: and # trigger by HA Restart & check if by-pass auto off is enabled and any by-passes are on
+        conditions:
+          - "{{ 'bypass_enabled' in include_bypass }}"
+          - condition: trigger
+            id: 'restrat_ha'
+          - condition: or
+            conditions:
+              - condition: state
+                entity_id: !input motion_bypass_fans_stop
+                match: any
+                state: 'on'
+
+# Check Motion Sensor Manual By-pass
+  - condition: or
+    conditions:
+      - "{{ include_bypass == [] }}"
+      - condition: and
+        conditions:
+          - "{{ ('bypass_enabled' in include_bypass) }}"
+          - condition: state
+            entity_id: !input motion_bypass_fans_stop
+            state: 'off'
+      - condition: trigger
+        id: 
+          - 'bypass_stop'
+          - 'restart_ha'
+          
+# Check The Time Options
+  - condition: or
+    conditions:
+      - "{{ include_time == 'time_disabled' }}"
+      - condition: and
+        conditions:
+        - condition: time
+          after: !input after_time
+          before: !input before_time
+          weekday: !input weekday_options
+        -  "{{ include_time == 'time_enabled' }}"
+      - condition: trigger
+        id:
+          - 'bypass_stop'
+          - 'beforetime'
+          
+- condition: template
+  alias: Check for blocker entity
+  value_template: '{{ (blocker_entity == none) or (states(blocker_entity) == ''off'')}}'
+- condition: template
+  value_template: '{{ states(fan_switch) == ''on'' }}'
+  
+action:
+- choose:
+  - conditions:
+    - condition: trigger
+      id: fanon
+    - condition: template
+      value_template: '{{ speed_diff | float(0) > change_threshold | float(0) }}'
+    - condition: template
+      value_template: '{{ current_temp | float(0) > off_temp | float(0) }}'
+    sequence:
+    - service: homeassistant.turn_on
+      data:
+        percentage: '{{set_fan_speed}}'
+      target:
+        entity_id: '{{fan_switch}}'
+    - delay:
+        minutes: !input change_time
+  - conditions:
+    - condition: template
+      value_template: '{{ speed_diff | float(0) > change_threshold | float(0) }}'
+    - condition: template
+      value_template: '{{ current_temp | float(0) > off_temp | float(0) }}'
+    - condition: template
+      value_template: '{{ states(fan_switch) == ''on'' }}'
+    sequence:
+    - service: homeassistant.turn_on
+      target:
+        entity_id: '{{fan_switch}}'
+      data:
+        percentage: '{{set_fan_speed}}'
+    - delay:
+        minutes: !input change_time
+  - conditions:
+    - condition: not
+      conditions:
+      - condition: trigger
+        id: motion
+      - condition: trigger
+        id: fanon
+    - condition: numeric_state
+      entity_id: !input temp_sensor
+      below: !input off_temp
+    sequence:
+    - service: homeassistant.turn_off
+      target:
+        entity_id: '{{fan_switch}}'
