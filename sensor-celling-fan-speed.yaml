@@ -215,7 +215,7 @@ variables:
   motion_trigger: !input motion_trigger
   time_delay: !input time_delay
   include_bypass: !input include_bypass
-  motion_bypass_fans_stop: !input motion_bypass_fanss_stop
+  motion_bypass_fans_stop: !input motion_bypass_fans_stop
   change_time: !input change_time
   min_temp: !input min_temp
   off_temp: !input off_temp
@@ -339,7 +339,6 @@ condition:
         - condition: time
           after: !input after_time
           before: !input before_time
-          weekday: !input weekday_options
         -  "{{ include_time == 'time_enabled' }}"
       - condition: trigger
         id:
