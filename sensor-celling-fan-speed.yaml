@@ -2,7 +2,7 @@ blueprint:
   name: Occupancy based auto celling fan speed
   description: >
     **Version: 1.0**
-    Motion sensor/ Binary Sensor triggred Temperature based Auto fan control.
+    # Motion sensor/ Binary Sensor triggred Temperature based Auto fan control.
 
     **If you like my blueprints, and would like to show your support or just say thank you?** 🙂
 
@@ -346,11 +346,11 @@ condition:
           - 'bypass_stop'
           - 'beforetime'
           
-- condition: template
-  alias: Check for blocker entity
-  value_template: '{{ (blocker_entity == none) or (states(blocker_entity) == ''off'')}}'
-- condition: template
-  value_template: '{{ states(fan_switch) == ''on'' }}'
+  - condition: template
+    alias: Check for blocker entity
+    value_template: '{{ (blocker_entity == none) or (states(blocker_entity) == ''off'')}}'
+  - condition: template
+    value_template: '{{ states(fan_switch) == ''on'' }}'
   
 action:
 - choose:
